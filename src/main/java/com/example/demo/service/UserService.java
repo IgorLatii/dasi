@@ -38,4 +38,10 @@ public class UserService {
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }
+
+    public User updateUserRole(String id, String role) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRole(role);
+        return userRepository.save(user);
+    }
 }
