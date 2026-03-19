@@ -46,12 +46,22 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+            );
+
             UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
             String token = jwtUtil.generateToken(userDetails);
-            Map<String, String> response = new HashMap<>();
+
+            User dbUser = userService.getUserByEmail(user.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Map<String, Object> response = new HashMap<>();
             response.put("token", token);
+            response.put("id", dbUser.getId());
+            response.put("email", dbUser.getEmail());
+            response.put("role", dbUser.getRole());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid credentials");
