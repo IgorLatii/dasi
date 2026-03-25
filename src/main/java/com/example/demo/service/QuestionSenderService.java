@@ -16,13 +16,26 @@ public class QuestionSenderService {
     }
 
     public Answer sendQuestion(Question question) {
+        try {
+            QuestionRequest request = new QuestionRequest(question.getQuestion());
 
-        QuestionRequest request = new QuestionRequest(question.getQuestion());
+            Answer answer = restTemplate.postForObject(
+                    "http://4.235.123.69:8000/ask",
+                    request,
+                    Answer.class
+            );
 
-        return restTemplate.postForObject(
-                "http://4.235.123.69:8000/ask",
-                request,
-                Answer.class
-        );
+            if (answer == null || answer.getAnswer() == null || answer.getAnswer().trim().isEmpty()) {
+                Answer fallback = new Answer();
+                fallback.setAnswer("AI service returned an empty response.");
+                return fallback;
+            }
+
+            return answer;
+        } catch (Exception e) {
+            Answer fallback = new Answer();
+            fallback.setAnswer("AI service is temporarily unavailable. Please try again later.");
+            return fallback;
+        }
     }
 }
