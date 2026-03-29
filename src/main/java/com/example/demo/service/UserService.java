@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.repository.UserRepository;
 import com.example.demo.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    
+    @Autowired(required = false)
+    private HtmlEmailService htmlEmailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public User createUser(User user) {
@@ -24,7 +30,22 @@ public class UserService {
             throw new RuntimeException("User with this email already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Send welcome email notification
+        try {
+            // Try HTML email first if available, fallback to plain text
+            if (htmlEmailService != null) {
+                htmlEmailService.sendHtmlWelcomeEmail(savedUser.getEmail(), savedUser.getEmail());
+            } else {
+                emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getEmail());
+            }
+        } catch (Exception e) {
+            // Log the error but don't fail the registration
+            System.err.println("Failed to send welcome email: " + e.getMessage());
+        }
+        
+        return savedUser;
     }
 
     public List<User> getAllUsers() {

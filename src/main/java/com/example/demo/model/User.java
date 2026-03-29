@@ -17,6 +17,9 @@ public class User {
     private String password;
     private String role = "USER";
 
+    public String getId() {
+        return id;
+    }
 
     public String getEmail() {
         return email;
