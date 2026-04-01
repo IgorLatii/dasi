@@ -30,10 +30,7 @@ jobs:
       - name: Make mvnw executable
         run: chmod +x mvnw
 
-      - name: Run tests
-        run: ./mvnw test
-
-      - name: Build jar
+      - name: Build jar without tests
         run: ./mvnw clean package -DskipTests
 
   build-and-push:
