@@ -2,7 +2,7 @@ name: dasi-demo-ci-cd
 
 on:
   push:
-    branches: ["demo-cicd"]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
