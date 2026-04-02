@@ -24,7 +24,7 @@ public class QuestionSenderService {
             QuestionRequest request = new QuestionRequest(question.getQuestion());
 
             Answer answer = restTemplate.postForObject(
-                    "apiUrl",
+                    apiUrl,
                     request,
                     Answer.class
             );
